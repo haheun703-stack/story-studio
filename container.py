@@ -106,6 +106,7 @@ class Container:
 
             router.register("mock", _MockStoryGenerator())
             router._default_provider = "mock"
+            router._current_provider = "mock"
             logger.warning("API 키가 없어 Mock 모드로 실행합니다.")
 
         self._router = router
@@ -187,18 +188,38 @@ class Container:
         return self._tts_generator
 
     def content_crawler(self, age_group_value: str = "유치부") -> Optional[IContentCrawler]:
-        """연령 그룹에 맞는 크롤러를 생성/반환합니다."""
+        """연령 그룹에 맞는 크롤러를 생성/반환합니다. Gemini API key를 전달합니다."""
         from core.entities import AgeGroup
+        api_key = self.settings.llm.gemini_api_key
         try:
             if age_group_value == AgeGroup.PRESCHOOL.value or age_group_value == "preschool":
                 from infrastructure.crawlers import FairyTaleCrawler
-                return FairyTaleCrawler()
+                return FairyTaleCrawler(api_key=api_key)
             else:
                 from infrastructure.crawlers import TextbookCrawler
-                return TextbookCrawler()
+                return TextbookCrawler(api_key=api_key)
         except ImportError:
             logger.warning("크롤러를 로드할 수 없습니다.")
             return None
+
+    # ── 출력/편집 팩토리 ──────────────────────────────────────
+
+    def blog_generator(self):
+        """블로그 마크다운 생성기를 생성/반환합니다."""
+        from infrastructure.blog_generator import BlogMarkdownGenerator
+        return BlogMarkdownGenerator(
+            output_dir=f"{self.settings.storage.media_dir}/../blog",
+        )
+
+    def ffmpeg_editor(self):
+        """FFmpeg 편집기를 생성/반환합니다."""
+        from infrastructure.ffmpeg_editor import FFmpegEditor
+        return FFmpegEditor(ffmpeg_path=self.settings.media.ffmpeg_path)
+
+    def youtube_uploader(self):
+        """YouTube 업로더를 생성/반환합니다."""
+        from infrastructure.youtube_uploader import YouTubeUploader
+        return YouTubeUploader()
 
     # ── 에피소드 관련 팩토리 ──────────────────────────────────
 
@@ -219,6 +240,9 @@ class Container:
             video_generator=self.video_generator(),
             tts_generator=self.tts_generator(),
             content_crawler=self.content_crawler(age_group_value),
+            blog_generator=self.blog_generator(),
+            ffmpeg_editor=self.ffmpeg_editor(),
+            youtube_uploader=self.youtube_uploader(),
             max_retries=self.settings.pipeline.max_retries,
             retry_delay=self.settings.pipeline.retry_delay_seconds,
         )

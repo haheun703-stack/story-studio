@@ -18,6 +18,7 @@ from core.interfaces import (
     ITTSGenerator, IContentCrawler,
 )
 from core.exceptions import PipelineStageError
+from application.character_consistency import apply_consistency
 
 logger = logging.getLogger(__name__)
 
@@ -60,10 +61,10 @@ class PipelineManager:
     4. IMAGE_GEN      - 이미지 생성
     5. VIDEO_GEN      - 영상 생성
     6. TTS            - 나레이션 음성 생성
-    7. EDITING         - 편집 메타데이터
+    7. EDITING         - ffmpeg 영상 편집
     8. QA             - 품질 검수
-    9. BLOG_PUBLISH   - 블로그 게시 준비
-    10. YOUTUBE_PUBLISH - 유튜브 업로드 준비
+    9. BLOG_PUBLISH   - 블로그 마크다운 생성
+    10. YOUTUBE_PUBLISH - 유튜브 메타데이터/업로드
     """
 
     def __init__(
@@ -73,6 +74,9 @@ class PipelineManager:
         video_generator: Optional[IVideoGenerator] = None,
         tts_generator: Optional[ITTSGenerator] = None,
         content_crawler: Optional[IContentCrawler] = None,
+        blog_generator=None,
+        ffmpeg_editor=None,
+        youtube_uploader=None,
         max_retries: int = 3,
         retry_delay: int = 5,
     ):
@@ -81,6 +85,9 @@ class PipelineManager:
         self.video_generator = video_generator
         self.tts_generator = tts_generator
         self.content_crawler = content_crawler
+        self.blog_generator = blog_generator
+        self.ffmpeg_editor = ffmpeg_editor
+        self.youtube_uploader = youtube_uploader
         self.max_retries = max_retries
         self.retry_delay = retry_delay
 
@@ -242,9 +249,15 @@ class PipelineManager:
         return episode
 
     def _stage_scenario(self, episode: Episode, theme: str) -> Episode:
-        """3단계: 시나리오/대본 생성"""
+        """3단계: 시나리오/대본 생성 + 캐릭터 일관성 적용"""
         audience = AGE_GROUP_TO_AUDIENCE.get(episode.age_group, TargetAudience.ELEMENTARY)
         story = self.story_generator.generate_story(audience, theme)
+
+        # 캐릭터 일관성 적용: 모든 씬의 image_prompt/video_prompt에 캐릭터 외형 주입
+        if episode.character:
+            story = apply_consistency(story, episode.character)
+            logger.info("캐릭터 일관성 적용 완료: %s", episode.character.name)
+
         episode.story = story
         episode.title = story.title
 
@@ -253,6 +266,7 @@ class PipelineManager:
             stage_result.output_data = {
                 "scene_count": len(story.scenes),
                 "is_long_form_ready": story.is_long_form_ready(),
+                "character_consistency": episode.character is not None,
             }
         return episode
 
@@ -317,22 +331,57 @@ class PipelineManager:
         return episode
 
     def _stage_editing(self, episode: Episode, theme: str) -> Episode:
-        """7단계: 편집 메타데이터 생성 (ffmpeg 연동 준비)"""
-        stage_result = self._find_stage_result(episode, PipelineStage.EDITING)
-        if stage_result:
-            image_assets = [a for a in episode.media_assets if a.asset_type == MediaType.IMAGE]
-            video_assets = [a for a in episode.media_assets if a.asset_type == MediaType.VIDEO]
-            audio_assets = [a for a in episode.media_assets if a.asset_type == MediaType.AUDIO]
+        """7단계: ffmpeg 영상 편집"""
+        image_assets = [a for a in episode.media_assets if a.asset_type == MediaType.IMAGE and a.status == AssetStatus.COMPLETED]
+        video_assets = [a for a in episode.media_assets if a.asset_type == MediaType.VIDEO and a.status == AssetStatus.COMPLETED]
+        audio_assets = [a for a in episode.media_assets if a.asset_type == MediaType.AUDIO and a.status == AssetStatus.COMPLETED]
 
-            stage_result.output_data = {
-                "editing_plan": {
+        stage_result = self._find_stage_result(episode, PipelineStage.EDITING)
+
+        # ffmpeg_editor가 없거나 사용 불가능하면 메타데이터만 기록
+        if not self.ffmpeg_editor or not self.ffmpeg_editor.is_available:
+            if stage_result:
+                stage_result.output_data = {
                     "total_images": len(image_assets),
                     "total_videos": len(video_assets),
                     "total_audio": len(audio_assets),
-                    "status": "메타데이터 준비 완료 (ffmpeg 연동 대기)",
-                },
+                    "status": "ffmpeg 미사용 - 메타데이터만 기록",
+                }
+            logger.info("ffmpeg 미사용 - 편집 메타데이터만 기록")
+            return episode
+
+        # ffmpeg로 최종 영상 합성
+        try:
+            episode_media = {
+                "images": [a.file_path for a in image_assets],
+                "videos": [a.file_path for a in video_assets],
+                "audio": [a.file_path for a in audio_assets],
+                "episode_id": episode.episode_id,
             }
-        logger.info("편집 메타데이터 생성 완료")
+            final_path = self.ffmpeg_editor.create_episode_video(episode_media)
+
+            # 최종 영상을 미디어 에셋에 추가
+            episode.media_assets.append(MediaAsset(
+                asset_type=MediaType.VIDEO,
+                file_path=final_path,
+                prompt_used="ffmpeg 최종 합성 영상",
+                status=AssetStatus.COMPLETED,
+                metadata={"type": "final_video", "source_images": len(image_assets), "source_videos": len(video_assets)},
+            ))
+
+            if stage_result:
+                stage_result.output_data = {"final_video_path": final_path, "status": "편집 완료"}
+            logger.info("ffmpeg 편집 완료: %s", final_path)
+        except Exception as e:
+            logger.warning("ffmpeg 편집 실패, 메타데이터만 기록: %s", e)
+            if stage_result:
+                stage_result.output_data = {
+                    "total_images": len(image_assets),
+                    "total_videos": len(video_assets),
+                    "total_audio": len(audio_assets),
+                    "status": f"편집 실패: {e}",
+                }
+
         return episode
 
     def _stage_qa(self, episode: Episode, theme: str) -> Episode:
@@ -365,27 +414,62 @@ class PipelineManager:
         return episode
 
     def _stage_blog_publish(self, episode: Episode, theme: str) -> Episode:
-        """9단계: 블로그 게시 준비 (마크다운 생성)"""
+        """9단계: 블로그 마크다운 생성"""
         stage_result = self._find_stage_result(episode, PipelineStage.BLOG_PUBLISH)
-        if stage_result:
-            stage_result.output_data = {
-                "status": "마크다운 생성 준비 완료",
-                "platform": "블로그",
-            }
-        logger.info("블로그 게시 준비 완료")
+
+        if not self.blog_generator:
+            if stage_result:
+                stage_result.output_data = {"status": "블로그 생성기 미등록 - 스킵", "platform": "블로그"}
+            logger.info("블로그 생성기 미등록 - 스킵")
+            return episode
+
+        try:
+            md_path = self.blog_generator.generate(episode)
+            if stage_result:
+                stage_result.output_data = {"markdown_path": md_path, "status": "마크다운 생성 완료", "platform": "블로그"}
+            logger.info("블로그 마크다운 생성 완료: %s", md_path)
+        except Exception as e:
+            logger.warning("블로그 마크다운 생성 실패: %s", e)
+            if stage_result:
+                stage_result.output_data = {"status": f"생성 실패: {e}", "platform": "블로그"}
+
         return episode
 
     def _stage_youtube_publish(self, episode: Episode, theme: str) -> Episode:
-        """10단계: 유튜브 업로드 메타데이터 생성"""
+        """10단계: 유튜브 메타데이터 생성 및 업로드"""
         stage_result = self._find_stage_result(episode, PipelineStage.YOUTUBE_PUBLISH)
+
+        if not self.youtube_uploader:
+            if stage_result:
+                stage_result.output_data = {
+                    "status": "유튜브 업로더 미등록 - 메타데이터만 기록",
+                    "platform": "YouTube",
+                    "title": episode.title,
+                }
+            logger.info("유튜브 업로더 미등록 - 메타데이터만 기록")
+            return episode
+
+        # 메타데이터 생성 (항상 동작)
+        metadata = self.youtube_uploader.build_metadata(episode)
+
+        # 최종 영상 파일 탐색
+        final_videos = [a for a in episode.media_assets
+                        if a.asset_type == MediaType.VIDEO
+                        and a.metadata.get("type") == "final_video"
+                        and a.status == AssetStatus.COMPLETED]
+
+        video_url = None
+        if final_videos:
+            video_url = self.youtube_uploader.upload(final_videos[0].file_path, episode)
+
         if stage_result:
             stage_result.output_data = {
-                "status": "업로드 메타데이터 준비 완료",
+                "metadata": metadata,
+                "video_url": video_url,
+                "status": "업로드 완료" if video_url else "메타데이터 생성 완료 (업로드 미실행)",
                 "platform": "YouTube",
-                "title": episode.title,
-                "description": f"{episode.age_group.value} 대상 {episode.content_type.value} 콘텐츠",
             }
-        logger.info("유튜브 게시 준비 완료")
+        logger.info("유튜브 단계 완료: url=%s", video_url or "없음")
         return episode
 
     # ── 유틸리티 ─────────────────────────────────────────────
