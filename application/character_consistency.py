@@ -31,15 +31,15 @@ from core.entities import Character, Scene, Story, AgeGroup
 
 _STYLE_PRESETS = {
     AgeGroup.PRESCHOOL: {
-        "style_keywords": "kawaii, pastel colors, soft shading, rounded shapes",
-        "illustration_type": "children's picture book illustration",
-        "color_palette": "soft pastel tones, warm and gentle colors",
+        "style_keywords": "kawaii, pastel colors, soft shading, rounded shapes, simple backgrounds",
+        "illustration_type": "children's picture book illustration, digital art",
+        "color_palette": "soft pastel tones, warm and gentle colors, low contrast",
         "mood": "warm, friendly, safe, comforting",
     },
     AgeGroup.ELEMENTARY: {
-        "style_keywords": "adventure, vibrant colors, dynamic composition, detailed",
-        "illustration_type": "animated adventure book illustration",
-        "color_palette": "vibrant and rich colors, high contrast",
+        "style_keywords": "adventure, vibrant colors, dynamic composition, detailed backgrounds",
+        "illustration_type": "animated adventure book illustration, digital art",
+        "color_palette": "vibrant and rich colors, high contrast, saturated",
         "mood": "exciting, curious, energetic, inspiring",
     },
 }

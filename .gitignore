@@ -10,6 +10,9 @@ build/
 .venv/
 venv/
 
+# 인증 정보 (YouTube OAuth 등)
+credentials/
+
 # 생성된 출력물 (미디어, 에피소드 JSON)
 output/
 

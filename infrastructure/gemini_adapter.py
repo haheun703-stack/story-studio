@@ -71,19 +71,38 @@ class GeminiStoryGenerator(IStoryGenerator):
 
     def _generate_characters(self, audience: TargetAudience, theme: str) -> list['Character']:
         from core.entities import Character, AgeGroup
-        
-        prompt = f"""당신은 {audience.value} 대상 동화 작가입니다.
+
+        age_guide = (
+            "3~7세 유치부: 동글동글하고 귀여운 디자인, 밝은 파스텔 톤, 큰 눈과 작은 코, "
+            "단순하고 알아보기 쉬운 실루엣, 동물이나 판타지 캐릭터 선호"
+            if audience == TargetAudience.PRE_SCHOOL else
+            "8~13세 초등부: 좀 더 디테일한 디자인, 생동감 있는 색감, "
+            "또래 아이 캐릭터 또는 멋진 동물/로봇, 개성 있는 패션과 소품"
+        )
+
+        prompt = f"""당신은 {audience.value} 대상 아동 콘텐츠 전문 캐릭터 디자이너입니다.
 주제: "{theme}"
 
+## 목표
 이 동화에 등장할 주요 캐릭터 3~5명을 생성하세요.
-각 캐릭터는 {audience.value}가 좋아할 만한 매력적인 외모와 성격을 가져야 합니다.
 
-규칙:
-- name: 캐릭터 이름
-- role: 역할 (예: 주인공, 조력자, 악당 등)
-- description: 성격 및 외모 묘사 (한국어)
-- visual_features: 캐릭터 외형 상세 묘사 (영어, 일관성 유지를 위해 매우 구체적으로 작성: "5yo girl, short brown bob hair with bangs, round face, wearing yellow overalls and white t-shirt, red sneakers". 옷차림과 헤어스타일 고정)
-- avatar_prompt: 캐릭터 전신 일러스트 생성용 영어 프롬프트 (Midjourney 스타일, 흰 배경, 전신 샷)
+## 연령별 디자인 가이드
+{age_guide}
+
+## 캐릭터 설계 규칙
+1. **name**: 한국어 이름 (2~3글자, 발음하기 쉬운 이름)
+2. **role**: 역할 — 주인공(1명), 조력자(1~2명), 갈등 유발자 또는 멘토(0~1명)
+3. **description**: 성격 + 외모 한국어 요약 (3문장 이내)
+4. **visual_features**: 캐릭터 외형을 영어로 매우 구체적으로 묘사. 모든 씬에서 동일하게 적용되므로 아래 요소를 반드시 포함:
+   - 종류/나이 (예: "7-year-old Korean girl", "baby fox character")
+   - 머리 스타일과 색 (예: "short brown bob hair with bangs")
+   - 얼굴 특징 (예: "round face, large brown eyes, small button nose")
+   - 옷차림 고정 (예: "wearing yellow overalls over a white t-shirt")
+   - 신발/액세서리 (예: "red sneakers, small star-shaped backpack")
+5. **avatar_prompt**: 캐릭터 레퍼런스 시트용 영어 프롬프트. 반드시 포함:
+   - visual_features 전체 내용
+   - "full body character reference sheet, front view, white background"
+   - "children's picture book illustration, clean line art, soft shading"
 
 JSON 형식:
 {{
@@ -126,16 +145,44 @@ JSON 형식:
             return []
 
     def _build_initial_prompt(self, audience: TargetAudience, theme: str, count: int) -> str:
-        return f"""당신은 {audience.value} 대상 동화 작가입니다.
+        narration_guide = (
+            "유치부(3~7세) 수준: 짧고 단순한 문장, 의성어·의태어 활용, "
+            "\"~했어요\" 존댓말 어미, 반복 구조로 리듬감"
+            if audience == TargetAudience.PRE_SCHOOL else
+            "초등부(8~13세) 수준: 묘사가 풍부한 서술체, 감정 표현과 대화 포함, "
+            "\"~했다/~였다\" 서술체, 교훈적 메시지 자연스럽게 녹이기"
+        )
+
+        return f"""당신은 {audience.value} 대상 전문 동화 작가입니다.
 주제: "{theme}"
 
+## 목표
 아래 JSON 형식으로 정확히 {count}개의 씬(scene)을 생성하세요.
-각 씬은 13~15분 분량의 롱폼 유튜브 영상의 한 장면입니다.
+전체 씬을 이어 붙이면 13~15분 분량의 유튜브 영상이 됩니다.
 
-규칙:
-- narration: {audience.value} 수준에 맞는 서술 (2~4문장)
-- image_prompt: 해당 장면의 일러스트레이션 생성용 영어 프롬프트 (Midjourney 스타일). **중요: 캐릭터의 외모(머리색, 옷 등)를 묘사하지 마세요. 오직 이름과 행동/표정만 묘사하세요.**
-- video_prompt: 해당 장면의 영상 생성용 영어 프롬프트 (Runway/Sora 스타일)
+## 스토리 구조 가이드
+- 도입(처음 20%): 배경과 캐릭터 소개, 일상 묘사
+- 전개(20~50%): 사건 발생, 모험 시작, 새로운 만남
+- 위기(50~75%): 갈등 고조, 시련과 도전
+- 절정(75~90%): 최대 위기, 캐릭터 성장
+- 결말(마지막 10%): 문제 해결, 교훈, 따뜻한 마무리
+
+## 나레이션 작성 규칙
+{narration_guide}
+- 씬당 3~5문장 (TTS로 읽었을 때 약 5~6초 분량)
+- 시각적 장면 전환이 분명하도록 각 씬의 장소/상황을 명시
+
+## image_prompt 작성 규칙 (Imagen 4 최적화)
+- 영어로 작성
+- 구조: "[장면 설명], [배경/환경], [조명/분위기], children's picture book illustration, digital art"
+- **중요: 캐릭터 외모(머리색, 옷 등)를 묘사하지 마세요. 캐릭터의 이름과 행동/표정/포즈만 묘사하세요. 외형은 별도로 자동 주입됩니다.**
+- 예시: "a small girl joyfully jumping over a puddle, enchanted forest with glowing mushrooms, warm golden sunlight filtering through trees, children's picture book illustration, digital art"
+
+## video_prompt 작성 규칙 (Veo 3.1 최적화)
+- 영어로 작성
+- 구조: "[카메라 워크], [캐릭터 동작], [배경 움직임], cinematic lighting, 8 seconds"
+- 카메라 워크 예시: "slow zoom in", "tracking shot following", "wide establishing shot", "close-up on face"
+- 예시: "slow zoom in on a small girl as she jumps over a puddle, water splashing around her feet, enchanted forest background with floating particles, warm cinematic lighting, 8 seconds"
 
 JSON 형식:
 {{
@@ -153,19 +200,44 @@ JSON 형식:
         self, audience: TargetAudience, theme: str,
         start: int, count: int, existing: list[Scene]
     ) -> str:
-        last_narration = existing[-1].narration if existing else ""
-        return f"""당신은 {audience.value} 대상 동화 작가입니다.
+        # 최근 3개 씬의 나레이션을 컨텍스트로 제공
+        recent_narrations = [s.narration for s in existing[-3:]] if existing else []
+        context_text = "\n".join(f"  씬 {existing[-len(recent_narrations)+i].scene_number}: {n}"
+                                 for i, n in enumerate(recent_narrations))
+
+        total_target = self.target_scene_count
+        progress_pct = int(start / total_target * 100)
+
+        # 스토리 아크 위치 판단
+        if progress_pct < 20:
+            arc_guide = "현재 '도입' 구간입니다. 배경과 캐릭터를 자연스럽게 소개하세요."
+        elif progress_pct < 50:
+            arc_guide = "현재 '전개' 구간입니다. 사건을 전개하고 새로운 만남/발견을 추가하세요."
+        elif progress_pct < 75:
+            arc_guide = "현재 '위기' 구간입니다. 갈등을 고조시키고 도전적 상황을 만드세요."
+        elif progress_pct < 90:
+            arc_guide = "현재 '절정' 구간입니다. 최대 위기를 만들고 캐릭터의 성장을 보여주세요."
+        else:
+            arc_guide = "현재 '결말' 구간입니다. 문제를 해결하고 따뜻한 교훈으로 마무리하세요."
+
+        return f"""당신은 {audience.value} 대상 전문 동화 작가입니다.
 주제: "{theme}"
 
-이전까지의 마지막 나레이션: "{last_narration}"
+## 이전 이야기 맥락 (최근 씬)
+{context_text}
 
+## 스토리 진행 상황
+- 현재 씬 {start}번 / 전체 약 {total_target}씬 (진행률 {progress_pct}%)
+- {arc_guide}
+
+## 지시
 이어서 씬 번호 {start}번부터 {count}개의 씬을 생성하세요.
-이전 이야기의 흐름을 자연스럽게 이어가세요.
+이전 이야기의 감정선과 사건 흐름을 자연스럽게 이어가되, 새로운 장면 전환을 포함하세요.
 
-규칙:
-- narration: {audience.value} 수준에 맞는 서술 (2~4문장)
-- image_prompt: 해당 장면의 일러스트레이션 생성용 영어 프롬프트 (Midjourney 스타일). **중요: 캐릭터의 외모(머리색, 옷 등)를 묘사하지 마세요. 오직 이름과 행동/표정만 묘사하세요.**
-- video_prompt: 해당 장면의 영상 생성용 영어 프롬프트 (Runway/Sora 스타일)
+## 작성 규칙 (초기 프롬프트와 동일)
+- narration: {audience.value} 수준 서술 (3~5문장, TTS 5~6초 분량)
+- image_prompt: 장면 일러스트 영어 프롬프트 (캐릭터 외모 묘사 금지, 이름+행동+표정만)
+- video_prompt: 장면 영상 영어 프롬프트 (카메라 워크 + 캐릭터 동작 + 배경)
 
 JSON 형식:
 {{
@@ -182,6 +254,7 @@ JSON 형식:
     def _generate_title(self, audience: TargetAudience, theme: str) -> str:
         prompt = f"""{audience.value} 대상 동화의 제목을 1개만 생성하세요.
 주제: "{theme}"
+규칙: 한국어, 10자 이내, 호기심을 자극하는 제목, 부제목 없음
 JSON 형식: {{"title": "..."}}"""
 
         response = self.client.models.generate_content(

@@ -30,10 +30,21 @@ class Imagen4ImageGenerator(IImageGenerator):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Imagen 4에 최적화된 기본 네거티브/품질 지시어
+    DEFAULT_QUALITY_SUFFIX = (
+        "high quality, sharp details, professional children's illustration, "
+        "no text, no watermark, no signature, safe for children"
+    )
+
     def generate_image(self, prompt: str, style: str = "") -> MediaAsset:
         """프롬프트로 이미지를 생성합니다."""
-        full_prompt = f"{style + ', ' if style else ''}{prompt}"
-        logger.info("Imagen 4 이미지 생성 중: %s", full_prompt[:80])
+        parts = []
+        if style:
+            parts.append(style)
+        parts.append(prompt)
+        parts.append(self.DEFAULT_QUALITY_SUFFIX)
+        full_prompt = ", ".join(parts)
+        logger.info("Imagen 4 이미지 생성 중: %s", full_prompt[:100])
 
         try:
             response = self.client.models.generate_images(

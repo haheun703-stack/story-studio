@@ -149,15 +149,16 @@ class FFmpegEditor:
         self._ensure_output_dir(output_path)
 
         # concat demuxer용 입력 목록 파일 생성
-        # 각 이미지를 duration_per_image 초 동안 표시
+        # 절대 경로로 변환 (임시 파일 위치와 무관하게 동작하도록)
         concat_lines = []
         for img_path in image_paths:
-            # 경로에 특수문자가 있을 수 있으므로 작은따옴표로 감싸기
-            safe_path = img_path.replace("'", "'\\''")
+            abs_path = os.path.abspath(img_path).replace("\\", "/")
+            safe_path = abs_path.replace("'", "'\\''")
             concat_lines.append(f"file '{safe_path}'")
             concat_lines.append(f"duration {duration_per_image}")
         # 마지막 이미지를 한 번 더 추가 (concat demuxer 특성상 필요)
-        safe_last = image_paths[-1].replace("'", "'\\''")
+        abs_last = os.path.abspath(image_paths[-1]).replace("\\", "/")
+        safe_last = abs_last.replace("'", "'\\''")
         concat_lines.append(f"file '{safe_last}'")
 
         concat_content = "\n".join(concat_lines)
@@ -234,9 +235,11 @@ class FFmpegEditor:
         self._ensure_output_dir(output_path)
 
         # concat demuxer용 입력 목록 파일 생성
+        # 절대 경로로 변환 (임시 파일 위치와 무관하게 동작하도록)
         concat_lines = []
         for vpath in video_paths:
-            safe_path = vpath.replace("'", "'\\''")
+            abs_path = os.path.abspath(vpath).replace("\\", "/")
+            safe_path = abs_path.replace("'", "'\\''")
             concat_lines.append(f"file '{safe_path}'")
 
         concat_content = "\n".join(concat_lines)
@@ -483,12 +486,15 @@ class FFmpegEditor:
         self._ensure_output_dir(output_path)
 
         # concat demuxer용 입력 목록 파일 생성
+        # 절대 경로로 변환 (임시 파일 위치와 무관하게 동작하도록)
         concat_lines = []
         for img_path in image_paths:
-            safe_path = img_path.replace("'", "'\\''")
+            abs_path = os.path.abspath(img_path).replace("\\", "/")
+            safe_path = abs_path.replace("'", "'\\''")
             concat_lines.append(f"file '{safe_path}'")
             concat_lines.append(f"duration {duration_per_image}")
-        safe_last = image_paths[-1].replace("'", "'\\''")
+        abs_last = os.path.abspath(image_paths[-1]).replace("\\", "/")
+        safe_last = abs_last.replace("'", "'\\''")
         concat_lines.append(f"file '{safe_last}'")
 
         concat_content = "\n".join(concat_lines)

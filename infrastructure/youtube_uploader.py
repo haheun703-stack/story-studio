@@ -2,11 +2,13 @@
 YouTube Data API v3를 사용한 영상 업로드 어댑터
 OAuth 2.0 인증 기반
 
-실제 업로드 기능은 google-api-python-client 패키지 설치 후 구현 예정입니다.
-현재는 메타데이터 생성(build_metadata)만 완전히 동작하며,
-인증/업로드/썸네일 설정은 뼈대(TODO)로 남겨져 있습니다.
+사용 전 Google Cloud Console에서:
+1. YouTube Data API v3 활성화
+2. OAuth 2.0 클라이언트 ID 생성 (데스크톱 앱)
+3. 클라이언트 시크릿 JSON 다운로드 → credentials/youtube_oauth.json
 """
 
+import json
 import logging
 from pathlib import Path
 from typing import Optional
@@ -14,6 +16,10 @@ from typing import Optional
 from core.entities import Episode, AgeGroup, ContentType
 
 logger = logging.getLogger(__name__)
+
+# YouTube API 스코프
+SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
+TOKEN_PATH = "credentials/youtube_token.json"
 
 
 class YouTubeUploader:
@@ -35,36 +41,64 @@ class YouTubeUploader:
     def authenticate(self) -> bool:
         """OAuth 2.0 인증을 수행합니다.
 
-        google-auth, google-api-python-client 패키지를 사용하여
-        브라우저 기반 OAuth 인증 플로우를 실행합니다.
-        인증 성공 시 토큰을 credentials/youtube_token.json에 저장합니다.
+        기존 토큰이 유효하면 재사용하고, 만료되었으면 갱신합니다.
+        토큰이 없으면 브라우저 기반 OAuth 플로우를 실행합니다.
 
         Returns:
-            인증 성공 여부 (현재는 항상 False)
+            인증 성공 여부
         """
-        # TODO: google-auth, google-api-python-client 사용
-        # 1. credentials_path에서 OAuth 클라이언트 시크릿 로드
-        #    client_secret = Path(self.credentials_path)
-        #    if not client_secret.exists():
-        #        logger.error("OAuth 시크릿 파일 없음: %s", self.credentials_path)
-        #        return False
-        #
-        # 2. 사용자 인증 플로우 실행 (브라우저 기반)
-        #    from google_auth_oauthlib.flow import InstalledAppFlow
-        #    SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
-        #    flow = InstalledAppFlow.from_client_secrets_file(str(client_secret), SCOPES)
-        #    credentials = flow.run_local_server(port=0)
-        #
-        # 3. 토큰 저장 (credentials/youtube_token.json)
-        #    token_path = Path("credentials/youtube_token.json")
-        #    token_path.write_text(credentials.to_json())
-        #
-        # 4. YouTube API 서비스 객체 생성
-        #    from googleapiclient.discovery import build
-        #    self._service = build("youtube", "v3", credentials=credentials)
+        try:
+            from google.oauth2.credentials import Credentials
+            from google_auth_oauthlib.flow import InstalledAppFlow
+            from googleapiclient.discovery import build
 
-        logger.info("YouTube OAuth 인증 (TODO: 실제 구현)")
-        return False
+            creds = None
+            token_path = Path(TOKEN_PATH)
+
+            # 1. 기존 토큰 로드 시도
+            if token_path.exists():
+                creds = Credentials.from_authorized_user_file(str(token_path), SCOPES)
+                logger.info("기존 토큰 로드 완료")
+
+            # 2. 토큰이 없거나 만료된 경우
+            if not creds or not creds.valid:
+                if creds and creds.expired and creds.refresh_token:
+                    from google.auth.transport.requests import Request
+                    creds.refresh(Request())
+                    logger.info("토큰 갱신 완료")
+                else:
+                    # OAuth 시크릿 파일 확인
+                    secret_path = Path(self.credentials_path)
+                    if not secret_path.exists():
+                        logger.error(
+                            "OAuth 시크릿 파일 없음: %s\n"
+                            "Google Cloud Console에서 다운로드하여 해당 경로에 저장하세요.",
+                            self.credentials_path,
+                        )
+                        return False
+
+                    flow = InstalledAppFlow.from_client_secrets_file(
+                        str(secret_path), SCOPES
+                    )
+                    creds = flow.run_local_server(port=0)
+                    logger.info("OAuth 인증 완료 (브라우저)")
+
+                # 3. 토큰 저장
+                token_path.parent.mkdir(parents=True, exist_ok=True)
+                token_path.write_text(creds.to_json())
+                logger.info("토큰 저장: %s", token_path)
+
+            # 4. YouTube API 서비스 객체 생성
+            self._service = build("youtube", "v3", credentials=creds)
+            logger.info("YouTube API 서비스 초기화 완료")
+            return True
+
+        except ImportError as e:
+            logger.error("필수 패키지 미설치: %s (pip install google-auth-oauthlib google-api-python-client)", e)
+            return False
+        except Exception as e:
+            logger.error("YouTube OAuth 인증 실패: %s", e)
+            return False
 
     # ── 영상 업로드 ──────────────────────────────────────────
 
@@ -79,57 +113,66 @@ class YouTubeUploader:
             업로드 성공 시 YouTube 영상 URL (https://youtu.be/{video_id}),
             실패 시 None
         """
-        # TODO: 실제 YouTube API 호출
-        # 1. 인증 확인
-        #    if self._service is None:
-        #        logger.error("YouTube API 미인증 상태입니다. authenticate()를 먼저 호출하세요.")
-        #        return None
-        #
-        # 2. 영상 파일 존재 확인
-        #    video_file = Path(video_path)
-        #    if not video_file.exists():
-        #        logger.error("영상 파일 없음: %s", video_path)
-        #        return None
-        #
-        # 3. 메타데이터 생성
-        metadata = self.build_metadata(episode)
-        #
-        # 4. YouTube API 요청 바디 구성
-        #    body = {
-        #        "snippet": {
-        #            "title": metadata["title"],
-        #            "description": metadata["description"],
-        #            "tags": metadata["tags"],
-        #            "categoryId": metadata["category_id"],
-        #        },
-        #        "status": {
-        #            "privacyStatus": metadata["privacy_status"],
-        #            "selfDeclaredMadeForKids": metadata["made_for_kids"],
-        #        },
-        #    }
-        #
-        # 5. MediaFileUpload로 파일 업로드
-        #    from googleapiclient.http import MediaFileUpload
-        #    media = MediaFileUpload(video_path, mimetype="video/*", resumable=True)
-        #    request = self._service.videos().insert(
-        #        part="snippet,status", body=body, media_body=media
-        #    )
-        #
-        # 6. 업로드 진행률 로깅
-        #    response = None
-        #    while response is None:
-        #        status, response = request.next_chunk()
-        #        if status:
-        #            logger.info("업로드 진행률: %d%%", int(status.progress() * 100))
-        #
-        # 7. 성공 시 video_id 반환
-        #    video_id = response["id"]
-        #    video_url = f"https://youtu.be/{video_id}"
-        #    logger.info("업로드 완료: %s", video_url)
-        #    return video_url
+        # 인증 확인
+        if self._service is None:
+            logger.warning("YouTube API 미인증 - 자동 인증 시도")
+            if not self.authenticate():
+                logger.error("YouTube 인증 실패, 업로드 중단")
+                return None
 
-        logger.info("YouTube 업로드 (TODO): title=%s", metadata["title"])
-        return None
+        # 영상 파일 확인
+        video_file = Path(video_path)
+        if not video_file.exists():
+            logger.error("영상 파일 없음: %s", video_path)
+            return None
+
+        metadata = self.build_metadata(episode)
+
+        try:
+            from googleapiclient.http import MediaFileUpload
+
+            body = {
+                "snippet": {
+                    "title": metadata["title"],
+                    "description": metadata["description"],
+                    "tags": metadata["tags"],
+                    "categoryId": metadata["category_id"],
+                },
+                "status": {
+                    "privacyStatus": metadata["privacy_status"],
+                    "selfDeclaredMadeForKids": metadata["made_for_kids"],
+                },
+            }
+
+            media = MediaFileUpload(
+                str(video_file),
+                mimetype="video/*",
+                resumable=True,
+                chunksize=10 * 1024 * 1024,  # 10MB 청크
+            )
+
+            request = self._service.videos().insert(
+                part="snippet,status",
+                body=body,
+                media_body=media,
+            )
+
+            logger.info("YouTube 업로드 시작: %s (%d bytes)", video_file.name, video_file.stat().st_size)
+
+            response = None
+            while response is None:
+                status, response = request.next_chunk()
+                if status:
+                    logger.info("업로드 진행률: %d%%", int(status.progress() * 100))
+
+            video_id = response["id"]
+            video_url = f"https://youtu.be/{video_id}"
+            logger.info("YouTube 업로드 완료: %s", video_url)
+            return video_url
+
+        except Exception as e:
+            logger.error("YouTube 업로드 실패: %s", e)
+            return None
 
     # ── 메타데이터 생성 ──────────────────────────────────────
 
@@ -165,20 +208,20 @@ class YouTubeUploader:
 
         # 설명문 구성
         description_lines = [
-            f"📚 {episode.title}",
+            f"\U0001F4DA {episode.title}",
             f"",
-            f"🎯 대상: {age_label} ({episode.content_type.value})",
+            f"\U0001F3AF 대상: {age_label} ({episode.content_type.value})",
             f"",
         ]
 
         if episode.story:
             description_lines.append(
-                f"📖 총 {len(episode.story.scenes)}개 장면으로 구성"
+                f"\U0001F4D6 총 {len(episode.story.scenes)}개 장면으로 구성"
             )
 
         if episode.character:
             description_lines.append(
-                f"👤 캐릭터: {episode.character.name} - {episode.character.description}"
+                f"\U0001F464 캐릭터: {episode.character.name} - {episode.character.description}"
             )
 
         description_lines.extend([
@@ -207,25 +250,28 @@ class YouTubeUploader:
             thumbnail_path: 썸네일 이미지 파일 경로
 
         Returns:
-            설정 성공 여부 (현재는 항상 False)
+            설정 성공 여부
         """
-        # TODO: thumbnails.set API 호출
-        # 1. 파일 존재 확인
-        #    thumb_file = Path(thumbnail_path)
-        #    if not thumb_file.exists():
-        #        logger.error("썸네일 파일 없음: %s", thumbnail_path)
-        #        return False
-        #
-        # 2. 썸네일 설정 API 호출
-        #    from googleapiclient.http import MediaFileUpload
-        #    media = MediaFileUpload(thumbnail_path, mimetype="image/jpeg")
-        #    self._service.thumbnails().set(
-        #        videoId=video_id, media_body=media
-        #    ).execute()
-        #
-        # 3. 성공 로깅
-        #    logger.info("썸네일 설정 완료: video_id=%s", video_id)
-        #    return True
+        if self._service is None:
+            logger.error("YouTube API 미인증 상태입니다.")
+            return False
 
-        logger.info("썸네일 설정 (TODO): video_id=%s", video_id)
-        return False
+        thumb_file = Path(thumbnail_path)
+        if not thumb_file.exists():
+            logger.error("썸네일 파일 없음: %s", thumbnail_path)
+            return False
+
+        try:
+            from googleapiclient.http import MediaFileUpload
+
+            media = MediaFileUpload(str(thumb_file), mimetype="image/jpeg")
+            self._service.thumbnails().set(
+                videoId=video_id, media_body=media
+            ).execute()
+
+            logger.info("썸네일 설정 완료: video_id=%s", video_id)
+            return True
+
+        except Exception as e:
+            logger.error("썸네일 설정 실패: %s", e)
+            return False
