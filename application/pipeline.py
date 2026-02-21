@@ -103,6 +103,7 @@ class PipelineManager:
                 role=character.role,
                 age_group=character.age_group,
                 description=character.description,
+                visual_features=character.visual_features,
                 avatar_prompt=character.avatar_prompt,
             )
 

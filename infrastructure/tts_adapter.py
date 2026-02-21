@@ -3,7 +3,9 @@ Gemini 2.5 Flash TTS 어댑터
 google.genai SDK를 사용하여 텍스트를 음성으로 변환합니다.
 """
 import logging
+import uuid
 import wave
+from datetime import datetime
 from pathlib import Path
 
 from google import genai
@@ -58,7 +60,7 @@ class GeminiTTSGenerator(ITTSGenerator):
 
             audio_data = response.candidates[0].content.parts[0].inline_data.data
 
-            file_name = f"tts_{hash(text) & 0xFFFFFFFF:08x}.wav"
+            file_name = f"tts_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}.wav"
             file_path = self.output_dir / file_name
 
             with wave.open(str(file_path), "wb") as wf:

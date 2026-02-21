@@ -4,13 +4,16 @@ CLI 인터페이스
 """
 import argparse
 import sys
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from core.entities import TargetAudience, AgeGroup, ContentType, OutputFormat
 from core.exceptions import StoryDomainError
 from application.dto import StoryRequest, EpisodeRequest
-from application.use_cases import StoryGenerationUseCase, EpisodeProductionUseCase
+from application.use_cases import StoryGenerationUseCase
 from .formatters import format_story_result, format_story_list, format_error
+
+if TYPE_CHECKING:
+    from container import Container
 
 
 class StoryStudioCLI:
@@ -20,11 +23,11 @@ class StoryStudioCLI:
         self,
         use_case: StoryGenerationUseCase,
         available_llms: list[str],
-        episode_use_case: Optional[EpisodeProductionUseCase] = None,
+        container: Optional['Container'] = None,
     ):
         self.use_case = use_case
         self.available_llms = available_llms
-        self.episode_use_case = episode_use_case
+        self.container = container
 
     def run(self, args: list[str] = None) -> None:
         """CLI 진입점"""
@@ -172,7 +175,7 @@ class StoryStudioCLI:
 
     def _handle_produce(self, args) -> None:
         """에피소드 제작 명령 처리"""
-        if not self.episode_use_case:
+        if not self.container:
             print("  에피소드 제작 기능이 설정되지 않았습니다.")
             sys.exit(1)
 
@@ -189,6 +192,9 @@ class StoryStudioCLI:
             character_name=args.character,
         )
 
+        # age_group에 맞는 episode_use_case를 동적 생성
+        episode_use_case = self.container.episode_use_case(request.age_group.value)
+
         print(f"\n  에피소드 제작 시작")
         print(f"  연령 그룹: {request.age_group.value}")
         print(f"  콘텐츠 유형: {request.content_type.value}")
@@ -196,7 +202,7 @@ class StoryStudioCLI:
         print(f"  출력 형식: {request.output_format.value}")
 
         try:
-            result = self.episode_use_case.produce(request)
+            result = episode_use_case.produce(request)
 
             print(f"\n{'='*60}")
             print(f"  에피소드 제작 완료")
@@ -228,11 +234,13 @@ class StoryStudioCLI:
 
     def _handle_status(self, args) -> None:
         """에피소드 제작 진행 상황 조회"""
-        if not self.episode_use_case:
+        if not self.container:
             print("  에피소드 제작 기능이 설정되지 않았습니다.")
             sys.exit(1)
 
-        status = self.episode_use_case.get_status(args.episode_id)
+        # status 조회는 age_group 무관 (저장소만 필요)
+        episode_use_case = self.container.episode_use_case()
+        status = episode_use_case.get_status(args.episode_id)
         if not status:
             print(f"  에피소드를 찾을 수 없습니다: {args.episode_id}")
             sys.exit(1)

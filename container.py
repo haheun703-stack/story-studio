@@ -36,8 +36,6 @@ class Container:
         self._tts_generator: Optional[ITTSGenerator] = None
         self._content_crawler: Optional[IContentCrawler] = None
         self._episode_repository: Optional[IEpisodeRepository] = None
-        self._pipeline_manager: Optional[PipelineManager] = None
-        self._episode_use_case: Optional[EpisodeProductionUseCase] = None
 
     # ── 기존 팩토리 ──────────────────────────────────────────
 
@@ -92,8 +90,21 @@ class Container:
 
         # Mock 폴백 (아무 API 키도 없는 경우)
         if not router.available_providers:
-            from main import MockStoryGenerator
-            router.register("mock", MockStoryGenerator())
+            from core.entities import Story, Scene
+            from core.interfaces import IStoryGenerator as _ISG
+            from core.entities import TargetAudience as _TA
+
+            class _MockStoryGenerator(_ISG):
+                def generate_story(self, audience: _TA, theme: str) -> Story:
+                    scenes = [
+                        Scene(scene_number=i, narration=f"테스트 나레이션 {i}",
+                              image_prompt="테스트 이미지", video_prompt="테스트 비디오")
+                        for i in range(1, 156)
+                    ]
+                    return Story(title=f"더미 타이틀: {theme}", audience=audience,
+                                 theme=theme, scenes=scenes)
+
+            router.register("mock", _MockStoryGenerator())
             router._default_provider = "mock"
             logger.warning("API 키가 없어 Mock 모드로 실행합니다.")
 
@@ -201,11 +212,8 @@ class Container:
         return self._episode_repository
 
     def pipeline_manager(self, age_group_value: str = "유치부") -> PipelineManager:
-        """PipelineManager를 생성/반환합니다."""
-        if self._pipeline_manager is not None:
-            return self._pipeline_manager
-
-        self._pipeline_manager = PipelineManager(
+        """PipelineManager를 생성합니다. age_group에 따라 크롤러가 달라지므로 캐싱하지 않습니다."""
+        return PipelineManager(
             story_generator=self.story_generator(),
             image_generator=self.image_generator(),
             video_generator=self.video_generator(),
@@ -214,16 +222,13 @@ class Container:
             max_retries=self.settings.pipeline.max_retries,
             retry_delay=self.settings.pipeline.retry_delay_seconds,
         )
-        return self._pipeline_manager
 
     def episode_use_case(self, age_group_value: str = "유치부") -> EpisodeProductionUseCase:
-        """EpisodeProductionUseCase를 생성/반환합니다."""
-        if self._episode_use_case is None:
-            self._episode_use_case = EpisodeProductionUseCase(
-                pipeline_manager=self.pipeline_manager(age_group_value),
-                episode_repository=self.episode_repository(),
-            )
-        return self._episode_use_case
+        """EpisodeProductionUseCase를 생성합니다. age_group에 따라 파이프라인이 달라지므로 캐싱하지 않습니다."""
+        return EpisodeProductionUseCase(
+            pipeline_manager=self.pipeline_manager(age_group_value),
+            episode_repository=self.episode_repository(),
+        )
 
     # ── CLI ──────────────────────────────────────────────────
 
@@ -232,6 +237,6 @@ class Container:
         router = self.story_generator()
         return StoryStudioCLI(
             use_case=self.use_case(),
-            episode_use_case=self.episode_use_case(),
+            container=self,
             available_llms=router.available_providers,
         )

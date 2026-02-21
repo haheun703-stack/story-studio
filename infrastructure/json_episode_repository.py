@@ -87,6 +87,17 @@ class JsonEpisodeRepository(IEpisodeRepository):
                     }
                     for s in episode.story.scenes
                 ],
+                "characters": [
+                    {
+                        "name": c.name,
+                        "role": c.role,
+                        "age_group": c.age_group.value,
+                        "description": c.description,
+                        "visual_features": c.visual_features,
+                        "avatar_prompt": c.avatar_prompt,
+                    }
+                    for c in episode.story.characters
+                ],
             }
 
         char_dict = None
@@ -96,6 +107,7 @@ class JsonEpisodeRepository(IEpisodeRepository):
                 "role": episode.character.role,
                 "age_group": episode.character.age_group.value,
                 "description": episode.character.description,
+                "visual_features": episode.character.visual_features,
                 "avatar_prompt": episode.character.avatar_prompt,
             }
 
@@ -149,6 +161,17 @@ class JsonEpisodeRepository(IEpisodeRepository):
                     )
                     for s in sd.get("scenes", [])
                 ],
+                characters=[
+                    Character(
+                        name=c["name"],
+                        role=c["role"],
+                        age_group=AgeGroup(c["age_group"]),
+                        description=c["description"],
+                        visual_features=c.get("visual_features", ""),
+                        avatar_prompt=c["avatar_prompt"],
+                    )
+                    for c in sd.get("characters", [])
+                ],
             )
 
         character = None
@@ -159,6 +182,7 @@ class JsonEpisodeRepository(IEpisodeRepository):
                 role=cd["role"],
                 age_group=AgeGroup(cd["age_group"]),
                 description=cd["description"],
+                visual_features=cd.get("visual_features", ""),
                 avatar_prompt=cd["avatar_prompt"],
             )
 

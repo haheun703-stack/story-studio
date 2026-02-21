@@ -5,6 +5,8 @@ google.genai SDK를 사용하여 영상을 생성합니다.
 """
 import logging
 import time
+import uuid
+from datetime import datetime
 from pathlib import Path
 
 from google import genai
@@ -66,7 +68,7 @@ class Veo31VideoGenerator(IVideoGenerator):
                 raise MediaGenerationError("Veo3.1", "영상이 생성되지 않았습니다")
 
             video = operation.response.generated_videos[0]
-            file_name = f"vid_{hash(prompt) & 0xFFFFFFFF:08x}.mp4"
+            file_name = f"vid_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}.mp4"
             file_path = self.output_dir / file_name
             video.video.save(str(file_path))
 
