@@ -1,0 +1,26 @@
+# 환경 변수 (API 키 포함)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# 생성된 출력물 (미디어, 에피소드 JSON)
+output/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# bkit
+.bkit/

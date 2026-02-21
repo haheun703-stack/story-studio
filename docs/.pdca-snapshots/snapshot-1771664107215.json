@@ -1,0 +1,239 @@
+{
+  "timestamp": "2026-02-21T08:55:07.214Z",
+  "reason": "compaction",
+  "status": {
+    "version": "2.0",
+    "lastUpdated": "2026-02-21T08:18:13.947Z",
+    "activeFeatures": [
+      "infrastructure",
+      "story studio_code_동화",
+      "core",
+      "application",
+      "presentation"
+    ],
+    "primaryFeature": "infrastructure",
+    "features": {
+      "infrastructure": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-21T07:34:54.808Z",
+          "lastUpdated": "2026-02-21T08:16:42.031Z"
+        },
+        "lastFile": "d:/story studio_code_동화/infrastructure/__init__.py"
+      },
+      "story studio_code_동화": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-21T07:35:54.046Z",
+          "lastUpdated": "2026-02-21T08:18:13.947Z"
+        },
+        "lastFile": "d:/story studio_code_동화/main.py"
+      },
+      "core": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-21T08:13:33.142Z",
+          "lastUpdated": "2026-02-21T08:13:50.680Z"
+        },
+        "lastFile": "d:/story studio_code_동화/core/__init__.py"
+      },
+      "application": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-21T08:14:07.361Z",
+          "lastUpdated": "2026-02-21T08:14:31.317Z"
+        },
+        "lastFile": "d:/story studio_code_동화/application/__init__.py"
+      },
+      "presentation": {
+        "phase": "do",
+        "phaseNumber": 3,
+        "matchRate": null,
+        "iterationCount": 0,
+        "requirements": [],
+        "documents": {},
+        "timestamps": {
+          "started": "2026-02-21T08:17:04.727Z",
+          "lastUpdated": "2026-02-21T08:17:28.781Z"
+        },
+        "lastFile": "d:/story studio_code_동화/presentation/cli.py"
+      }
+    },
+    "pipeline": {
+      "currentPhase": 1,
+      "level": "Dynamic",
+      "phaseHistory": []
+    },
+    "session": {
+      "startedAt": "2026-02-21T07:24:37.653Z",
+      "onboardingCompleted": false,
+      "lastActivity": "2026-02-21T08:18:13.947Z"
+    },
+    "history": [
+      {
+        "timestamp": "2026-02-21T07:34:54.808Z",
+        "feature": "infrastructure",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T07:35:17.370Z",
+        "feature": "infrastructure",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T07:35:54.046Z",
+        "feature": "story studio_code_동화",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T07:36:49.109Z",
+        "feature": "infrastructure",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:13:33.142Z",
+        "feature": "core",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:13:44.220Z",
+        "feature": "core",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:13:50.680Z",
+        "feature": "core",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:14:07.361Z",
+        "feature": "application",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:14:26.300Z",
+        "feature": "application",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:14:31.317Z",
+        "feature": "application",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:14:52.068Z",
+        "feature": "infrastructure",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:15:28.405Z",
+        "feature": "infrastructure",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:15:36.357Z",
+        "feature": "infrastructure",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:15:41.749Z",
+        "feature": "infrastructure",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:15:59.876Z",
+        "feature": "infrastructure",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:16:10.762Z",
+        "feature": "infrastructure",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:16:19.737Z",
+        "feature": "infrastructure",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:16:30.293Z",
+        "feature": "infrastructure",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:16:42.031Z",
+        "feature": "infrastructure",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:17:04.727Z",
+        "feature": "presentation",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:17:14.913Z",
+        "feature": "presentation",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:17:28.781Z",
+        "feature": "presentation",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:17:57.658Z",
+        "feature": "story studio_code_동화",
+        "phase": "do",
+        "action": "updated"
+      },
+      {
+        "timestamp": "2026-02-21T08:18:13.947Z",
+        "feature": "story studio_code_동화",
+        "phase": "do",
+        "action": "updated"
+      }
+    ]
+  }
+}
