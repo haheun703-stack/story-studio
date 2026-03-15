@@ -36,8 +36,8 @@ else:
 # ==========================================
 # 1. 고정값 세팅 (절대 변하지 않는 캐릭터와 화풍)
 # ==========================================
-CHARACTER_DNA = "A simple, highly stylized 2D children's book illustration. Flat hand-drawn watercolor, zero 3D elements. An adorable small, chubby-cheeked Asian baby girl with a brown bob-cut and tidy fringe. She is smiling joyfully with her mouth open and rosy cheeks. She is standing barefoot and centered, with both arms fully outstretched to the sides in a wide, welcoming gesture. She wears simple light yellow denim overalls with copper buttons, over a clean white short-sleeved t-shirt."
-STYLE_DNA = "Absolutely NO 3D, NO CGI, NO photorealism. Extremely flat 2D vector-like pure watercolor wash. Minimalist and innocent style. The background is a clean white canvas with a soft, dreamlike arrangement of pastel blue and cream-colored watercolor clouds."
+CHARACTER_DNA = "A soft, warm watercolor illustration of the young girl from image_13.png, with her distinctive brown bob-cut hair, wearing the same yellow corduroy overalls and white t-shirt, and standing barefoot. Her expression is a gentle, open-mouthed smile, and her arms are spread wide in a welcoming embrace, identical in style and character details to image_13.png."
+STYLE_DNA = "The art style is a gentle, traditional watercolor painting with soft edges and a loose feel. The background is composed of soft, diffused pastel clouds from image_13.png. The lighting is soft and natural."
 
 # ==========================================
 # 2. 텍스트 AI API 호출 (Gemini - 대본 -> 장면별 JSON 변환)
