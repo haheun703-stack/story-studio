@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-21T09:07:56.174Z",
+  "lastUpdated": "2026-02-21T11:28:47.606Z",
   "activeFeatures": [
     "infrastructure",
     "story studio_code_동화",
@@ -20,9 +20,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-21T07:34:54.808Z",
-        "lastUpdated": "2026-02-21T09:07:56.174Z"
+        "lastUpdated": "2026-02-21T11:28:47.606Z"
       },
-      "lastFile": "d:\\story studio_code_동화\\infrastructure\\__init__.py"
+      "lastFile": "d:\\story studio_code_동화\\infrastructure\\youtube_uploader.py"
     },
     "story studio_code_동화": {
       "phase": "do",
@@ -33,7 +33,7 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-21T07:35:54.046Z",
-        "lastUpdated": "2026-02-21T09:07:30.002Z"
+        "lastUpdated": "2026-02-21T10:55:24.201Z"
       },
       "lastFile": "d:\\story studio_code_동화\\container.py"
     },
@@ -59,9 +59,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-21T08:14:07.361Z",
-        "lastUpdated": "2026-02-21T09:05:48.769Z"
+        "lastUpdated": "2026-02-21T11:25:34.842Z"
       },
-      "lastFile": "d:\\story studio_code_동화\\application\\__init__.py"
+      "lastFile": "d:\\story studio_code_동화\\application\\character_consistency.py"
     },
     "presentation": {
       "phase": "do",
@@ -72,9 +72,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-21T08:17:04.727Z",
-        "lastUpdated": "2026-02-21T09:07:23.459Z"
+        "lastUpdated": "2026-02-21T10:44:08.577Z"
       },
-      "lastFile": "d:\\story studio_code_동화\\presentation\\cli.py"
+      "lastFile": "d:\\story studio_code_동화\\presentation\\web_ui.py"
     },
     "crawlers": {
       "phase": "do",
@@ -85,9 +85,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-21T09:03:07.272Z",
-        "lastUpdated": "2026-02-21T09:03:29.640Z"
+        "lastUpdated": "2026-02-21T11:25:05.340Z"
       },
-      "lastFile": "d:\\story studio_code_동화\\infrastructure\\crawlers\\textbook_crawler.py"
+      "lastFile": "d:\\story studio_code_동화\\infrastructure\\crawlers\\fairy_tale_crawler.py"
     }
   },
   "pipeline": {
@@ -98,7 +98,7 @@
   "session": {
     "startedAt": "2026-02-21T07:24:37.653Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-02-21T09:07:56.174Z"
+    "lastActivity": "2026-02-21T11:28:47.606Z"
   },
   "history": [
     {
@@ -379,6 +379,276 @@
     },
     {
       "timestamp": "2026-02-21T09:07:56.174Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:18:36.864Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:18:45.450Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:18:52.741Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:19:01.234Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:19:09.609Z",
+      "feature": "application",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:19:42.425Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:19:47.592Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:19:52.554Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:19:58.351Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:20:46.138Z",
+      "feature": "story studio_code_동화",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:20:52.993Z",
+      "feature": "story studio_code_동화",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:21:09.595Z",
+      "feature": "presentation",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:21:27.345Z",
+      "feature": "presentation",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:21:34.640Z",
+      "feature": "presentation",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:21:47.770Z",
+      "feature": "story studio_code_동화",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:22:26.599Z",
+      "feature": "story studio_code_동화",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:33:10.098Z",
+      "feature": "application",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:33:22.920Z",
+      "feature": "crawlers",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:33:47.471Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:33:50.456Z",
+      "feature": "crawlers",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:34:01.181Z",
+      "feature": "presentation",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:34:02.120Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:34:06.181Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:34:34.787Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:34:47.099Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:41:44.525Z",
+      "feature": "application",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:42:05.263Z",
+      "feature": "application",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:42:17.905Z",
+      "feature": "application",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:42:35.041Z",
+      "feature": "application",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:42:46.028Z",
+      "feature": "application",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:42:59.224Z",
+      "feature": "application",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:43:42.807Z",
+      "feature": "story studio_code_동화",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:44:08.577Z",
+      "feature": "presentation",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T10:55:24.201Z",
+      "feature": "story studio_code_동화",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T11:17:06.535Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T11:18:47.340Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T11:18:59.550Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T11:23:51.165Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T11:24:19.098Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T11:24:42.345Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T11:24:50.209Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T11:25:05.340Z",
+      "feature": "crawlers",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T11:25:15.411Z",
+      "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T11:25:34.842Z",
+      "feature": "application",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-02-21T11:28:47.606Z",
       "feature": "infrastructure",
       "phase": "do",
       "action": "updated"

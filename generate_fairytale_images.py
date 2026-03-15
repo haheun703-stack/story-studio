@@ -36,8 +36,8 @@ else:
 # ==========================================
 # 1. 고정값 세팅 (절대 변하지 않는 캐릭터와 화풍)
 # ==========================================
-CHARACTER_DNA = "A soft, warm watercolor illustration of the young girl from image_13.png, with her distinctive brown bob-cut hair, wearing the same yellow corduroy overalls and white t-shirt, and standing barefoot. Her expression is a gentle, open-mouthed smile, and her arms are spread wide in a welcoming embrace, identical in style and character details to image_13.png."
-STYLE_DNA = "The art style is a gentle, traditional watercolor painting with soft edges and a loose feel. The background is composed of soft, diffused pastel clouds from image_13.png. The lighting is soft and natural."
+CHARACTER_DNA = "A soft, warm traditional watercolor illustration, identical in art style and character design details to image_13.png, depicting the young girl with brown bob-cut hair, wearing the same yellow corduroy overalls and white t-shirt, standing barefoot. Her expression is a gentle, warm, and open-mouthed smile, and her arms are spread wide in a welcoming embrace, exactly matching the pose and style from image_13.png."
+STYLE_DNA = "The art style is a gentle, warm, hand-painted watercolor with soft edges and a traditional loose feel. The background is composed of the same soft, diffused pastel clouds on a light background. The lighting is soft and natural."
 
 # ==========================================
 # 2. 텍스트 AI API 호출 (Gemini - 대본 -> 장면별 JSON 변환)

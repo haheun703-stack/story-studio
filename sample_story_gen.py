@@ -3,7 +3,7 @@ import logging
 import sys
 from container import Container
 from core.entities import TargetAudience, AgeGroup, Character, Story
-from application.image_generation_service import ImageGenerationService
+from application.image_generation_service_v2 import ImageGenerationService
 
 def main():
     # 1. 설정 및 컨테이너 초기화
@@ -14,6 +14,7 @@ def main():
     try:
         story_generator = container.story_generator()
         image_generator = container.image_generator()
+        from application.image_generation_service_v2 import ImageGenerationService
         image_service = ImageGenerationService(image_generator)
     except Exception as e:
         print(f"오류: 필수 구성 요소를 초기화할 수 없습니다. .env 설정을 확인하세요.\n상세: {e}")
