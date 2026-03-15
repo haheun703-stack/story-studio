@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-02-21T11:28:47.606Z",
+  "lastUpdated": "2026-03-15T15:17:59.960Z",
   "activeFeatures": [
     "infrastructure",
     "story studio_code_동화",
@@ -33,9 +33,9 @@
       "documents": {},
       "timestamps": {
         "started": "2026-02-21T07:35:54.046Z",
-        "lastUpdated": "2026-02-21T10:55:24.201Z"
+        "lastUpdated": "2026-03-15T15:17:59.960Z"
       },
-      "lastFile": "d:\\story studio_code_동화\\container.py"
+      "lastFile": "d:\\story studio_code_동화\\test_subject_reference.py"
     },
     "core": {
       "phase": "do",
@@ -98,7 +98,7 @@
   "session": {
     "startedAt": "2026-02-21T07:24:37.653Z",
     "onboardingCompleted": false,
-    "lastActivity": "2026-02-21T11:28:47.606Z"
+    "lastActivity": "2026-03-15T15:17:59.960Z"
   },
   "history": [
     {
@@ -650,6 +650,24 @@
     {
       "timestamp": "2026-02-21T11:28:47.606Z",
       "feature": "infrastructure",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-15T15:16:55.848Z",
+      "feature": "story studio_code_동화",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-15T15:17:53.870Z",
+      "feature": "story studio_code_동화",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-15T15:17:59.960Z",
+      "feature": "story studio_code_동화",
       "phase": "do",
       "action": "updated"
     }
