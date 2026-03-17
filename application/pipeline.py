@@ -77,6 +77,7 @@ class PipelineManager:
         blog_generator=None,
         ffmpeg_editor=None,
         youtube_uploader=None,
+        subject_ref_generator=None,
         max_retries: int = 3,
         retry_delay: int = 5,
     ):
@@ -88,6 +89,7 @@ class PipelineManager:
         self.blog_generator = blog_generator
         self.ffmpeg_editor = ffmpeg_editor
         self.youtube_uploader = youtube_uploader
+        self.subject_ref_generator = subject_ref_generator
         self.max_retries = max_retries
         self.retry_delay = retry_delay
 
@@ -271,13 +273,29 @@ class PipelineManager:
         return episode
 
     def _stage_image_gen(self, episode: Episode, theme: str) -> Episode:
-        """4단계: 이미지 생성"""
-        if not self.image_generator or not episode.story:
-            logger.info("이미지 생성기 미등록 또는 스토리 없음 - 스킵")
+        """4단계: 이미지 생성 (Subject Reference 우선, 폴백으로 기본 생성)"""
+        if not episode.story:
+            logger.info("스토리 없음 - 이미지 생성 스킵")
             return episode
 
+        # Subject Reference 사용 가능 여부 판단
+        use_subject_ref = (
+            self.subject_ref_generator
+            and episode.character
+            and episode.character.bible
+            and episode.character.bible.reference_image_path
+        )
+
+        if use_subject_ref:
+            return self._image_gen_with_subject_ref(episode)
+
+        if not self.image_generator:
+            logger.info("이미지 생성기 미등록 - 스킵")
+            return episode
+
+        # 기존 방식 폴백
         generated = 0
-        for scene in episode.story.scenes[:10]:  # 초기에는 10장만
+        for scene in episode.story.scenes[:10]:
             try:
                 asset = self.image_generator.generate_image(scene.image_prompt)
                 episode.media_assets.append(asset)
@@ -287,7 +305,34 @@ class PipelineManager:
 
         stage_result = self._find_stage_result(episode, PipelineStage.IMAGE_GEN)
         if stage_result:
-            stage_result.output_data = {"generated_images": generated}
+            stage_result.output_data = {"generated_images": generated, "method": "basic"}
+        return episode
+
+    def _image_gen_with_subject_ref(self, episode: Episode) -> Episode:
+        """Subject Reference 기반 이미지 생성"""
+        bible = episode.character.bible
+        generated = 0
+
+        for scene in episode.story.scenes[:20]:  # Subject Ref는 최대 20장
+            try:
+                asset = self.subject_ref_generator.generate_with_bible(
+                    bible=bible,
+                    action=scene.image_prompt,
+                    environment="",  # image_prompt에 이미 포함됨
+                )
+                episode.media_assets.append(asset)
+                generated += 1
+                logger.info("Subject Ref 이미지 %d 생성 완료", scene.scene_number)
+            except Exception as e:
+                logger.warning("씬 %d Subject Ref 이미지 실패: %s", scene.scene_number, e)
+
+        stage_result = self._find_stage_result(episode, PipelineStage.IMAGE_GEN)
+        if stage_result:
+            stage_result.output_data = {
+                "generated_images": generated,
+                "method": "subject_reference",
+                "reference_image": bible.reference_image_path,
+            }
         return episode
 
     def _stage_video_gen(self, episode: Episode, theme: str) -> Episode:

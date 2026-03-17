@@ -89,6 +89,53 @@ class Story:
 # ── 신규 Dataclass ──────────────────────────────────────────
 
 @dataclass
+class CharacterBible:
+    """캐릭터 바이블 - 불변/반고정/가변 요소 분리 관리"""
+
+    # 불변 요소 (절대 바꾸지 않음)
+    immutable: Dict[str, str] = field(default_factory=dict)
+    # 예: {"face": "round face, small nose", "eyes": "large brown eyes",
+    #       "hair": "dark brown bob", "skin": "fair skin", "age": "5-6 year old girl"}
+
+    # 반고정 요소 (특별한 이유 없으면 유지)
+    semi_fixed: Dict[str, str] = field(default_factory=dict)
+    # 예: {"default_outfit": "yellow overalls", "default_shoes": "red sneakers"}
+
+    # 금지 요소 (네거티브 프롬프트)
+    forbidden: List[str] = field(default_factory=list)
+    # 예: ["long hair", "different eye color", "realistic photo"]
+
+    # 아트 스타일 고정
+    art_style: str = "children's storybook illustration, soft lines, warm sunlight, pastel palette"
+
+    # 레퍼런스 이미지 경로 (Subject Reference용)
+    reference_image_path: str = ""
+
+    # subject_type: SUBJECT_TYPE_PERSON, SUBJECT_TYPE_ANIMAL, SUBJECT_TYPE_PRODUCT
+    subject_type: str = "SUBJECT_TYPE_PERSON"
+
+    def build_character_block(self) -> str:
+        """불변+반고정 요소를 결합한 캐릭터 프롬프트 블록"""
+        parts = list(self.immutable.values()) + list(self.semi_fixed.values())
+        return ", ".join(p for p in parts if p)
+
+    def build_negative_prompt(self) -> str:
+        """네거티브 프롬프트 생성"""
+        return ", ".join(self.forbidden) if self.forbidden else ""
+
+    def build_full_prompt(self, action: str, environment: str,
+                          emotion: str = "", camera: str = "") -> str:
+        """정규화된 전체 프롬프트: 캐릭터(40%) → 행동 → 배경 → 감정 → 구도 → 스타일"""
+        parts = [self.build_character_block(), action, environment]
+        if emotion:
+            parts.append(emotion)
+        if camera:
+            parts.append(camera)
+        parts.append(self.art_style)
+        return ", ".join(parts)
+
+
+@dataclass
 class Character:
     """에피소드 진행 캐릭터 (사회자)"""
     name: str
@@ -97,6 +144,7 @@ class Character:
     description: str                    # 캐릭터 설명
     visual_features: str                # 캐릭터 외형 묘사 (영어, 프롬프트용)
     avatar_prompt: str                  # 아바타 이미지 생성용 프롬프트
+    bible: Optional[CharacterBible] = None  # 캐릭터 바이블 (있으면 Subject Reference 사용)
 
 
 @dataclass

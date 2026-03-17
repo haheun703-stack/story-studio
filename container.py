@@ -36,6 +36,7 @@ class Container:
         self._tts_generator: Optional[ITTSGenerator] = None
         self._content_crawler: Optional[IContentCrawler] = None
         self._episode_repository: Optional[IEpisodeRepository] = None
+        self._subject_ref_generator = None
 
     # ── 기존 팩토리 ──────────────────────────────────────────
 
@@ -221,6 +222,30 @@ class Container:
         from infrastructure.youtube_uploader import YouTubeUploader
         return YouTubeUploader()
 
+    def subject_ref_generator(self):
+        """Subject Reference 이미지 생성기를 생성/반환합니다 (Vertex AI)."""
+        if self._subject_ref_generator is not None:
+            return self._subject_ref_generator
+
+        gcp_project = getattr(self.settings, 'gcp_project_id', '')
+        if not gcp_project:
+            # .env에서 직접 로드
+            import os
+            gcp_project = os.getenv("GCP_PROJECT_ID", "").strip('"')
+
+        if gcp_project:
+            try:
+                from infrastructure.subject_ref_generator import SubjectRefImageGenerator
+                self._subject_ref_generator = SubjectRefImageGenerator(
+                    gcp_project=gcp_project,
+                    api_key=self.settings.llm.gemini_api_key,
+                    output_dir=f"{self.settings.storage.media_dir}/images",
+                )
+            except Exception as e:
+                logger.warning("Subject Reference 생성기 초기화 실패: %s", e)
+
+        return self._subject_ref_generator
+
     # ── 에피소드 관련 팩토리 ──────────────────────────────────
 
     def episode_repository(self) -> IEpisodeRepository:
@@ -243,6 +268,7 @@ class Container:
             blog_generator=self.blog_generator(),
             ffmpeg_editor=self.ffmpeg_editor(),
             youtube_uploader=self.youtube_uploader(),
+            subject_ref_generator=self.subject_ref_generator(),
             max_retries=self.settings.pipeline.max_retries,
             retry_delay=self.settings.pipeline.retry_delay_seconds,
         )

@@ -24,7 +24,7 @@
 from dataclasses import dataclass, replace
 from typing import List
 
-from core.entities import Character, Scene, Story, AgeGroup
+from core.entities import Character, CharacterBible, Scene, Story, AgeGroup
 
 
 # ── 연령 그룹별 스타일 프리셋 ──────────────────────────────────
@@ -57,7 +57,8 @@ class CharacterConsistencyManager:
         """
         Args:
             character: 일관성을 유지할 대상 캐릭터 엔티티.
-                       character.visual_features가 프롬프트의 핵심 정보로 사용됩니다.
+                       character.bible이 있으면 바이블 기반 정규화 프롬프트 사용,
+                       없으면 기존 visual_features 방식으로 폴백.
         """
         self._character = character
 
@@ -67,20 +68,21 @@ class CharacterConsistencyManager:
         """
         씬의 image_prompt에 캐릭터 외형 정보를 일관되게 주입합니다.
 
-        캐릭터의 visual_features를 씬 프롬프트 앞에 배치하여
-        이미지 생성 시 캐릭터 외형이 우선적으로 반영되도록 합니다.
-
-        Args:
-            scene: 프롬프트를 생성할 대상 씬
-
-        Returns:
-            캐릭터 일관성이 적용된 이미지 프롬프트 문자열
-
-        예시 결과:
-            "cute baby star character, kawaii style, warm golden glow,
-             a star walking in the forest,
-             children's book illustration style, consistent character design"
+        바이블이 있으면 불변 캐릭터 블록 + 아트 스타일을 사용하고,
+        없으면 기존 visual_features 방식으로 폴백합니다.
         """
+        bible = self._character.bible
+        if bible:
+            # 바이블 기반: 캐릭터 블록(40%) + 씬 + 스타일
+            parts = [
+                bible.build_character_block(),
+                scene.image_prompt,
+                bible.art_style,
+                "consistent character design, same face same hairstyle",
+            ]
+            return ", ".join(parts)
+
+        # 기존 방식 폴백
         style_ref = self.generate_style_reference()
         parts = [
             self._character.visual_features,
@@ -90,18 +92,17 @@ class CharacterConsistencyManager:
         return ", ".join(parts)
 
     def build_video_prompt(self, scene: Scene) -> str:
-        """
-        씬의 video_prompt에 캐릭터 일관성 정보를 적용합니다.
+        """씬의 video_prompt에 캐릭터 일관성 정보를 적용합니다."""
+        bible = self._character.bible
+        if bible:
+            parts = [
+                bible.build_character_block(),
+                scene.video_prompt,
+                bible.art_style,
+                "consistent character design, smooth animation, continuous motion",
+            ]
+            return ", ".join(parts)
 
-        영상 프롬프트는 이미지 프롬프트와 동일한 캐릭터 외형 정보를 사용하되,
-        영상 특화 지시어(smooth animation, continuous motion)를 추가합니다.
-
-        Args:
-            scene: 프롬프트를 생성할 대상 씬
-
-        Returns:
-            캐릭터 일관성이 적용된 영상 프롬프트 문자열
-        """
         style_ref = self.generate_style_reference()
         parts = [
             self._character.visual_features,
